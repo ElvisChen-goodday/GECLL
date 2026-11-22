@@ -1,0 +1,11 @@
+numpy>=1.26
+scipy>=1.11
+requests>=2.31
+torch>=2.1
+FlagEmbedding>=1.2.10
+transformers>=4.40
+beautifulsoup4>=4.12
+lxml>=5.0
+pandas>=2.0
+pyarrow>=14.0
+tqdm>=4.66
