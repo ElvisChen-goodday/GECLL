@@ -11,7 +11,7 @@ _sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.dirname(_os.path.
 from config import P, DATA_DIR, ENV_FILE, load_env, N_PARENTS, CAND_K, SIDE_TOPK, N_EVID
 import os, re, json, gc, time, sqlite3, difflib, csv, unicodedata, math
 os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
-os.environ.setdefault("HF_HUB_OFFLINE", "1")
+os.environ.setdefault("HF_HUB_OFFLINE", os.environ.get("RAG_OFFLINE", "1"))
 
 import numpy as np
 import scipy.sparse as sp
@@ -104,6 +104,7 @@ VOCAB = json.load(open(P("bm25_vocab.json"), encoding="utf-8"))
 tables = [json.loads(l) for l in open(P("tables_db.jsonl"), encoding="utf-8")]
 T_PK = np.array([t["table_pk"] for t in tables])
 T_TK = np.array([t["ticker"] for t in tables])
+T_TK_SET = set(T_TK.tolist())
 tvec = np.load(P("tables_db_vec.npy"), mmap_mode="r").astype(np.float32)
 tbm25 = sp.load_npz(P("tables_db_bm25.npz")).tocsr()
 TVOCAB = json.load(open(P("tables_db_bm25_vocab.json"), encoding="utf-8"))
@@ -134,7 +135,7 @@ def qtok(q, vocab):
 
 def main_path(queries):
     from FlagEmbedding import BGEM3FlagModel
-    model = BGEM3FlagModel("BAAI/bge-m3", use_fp16=True, device="cuda")
+    model = BGEM3FlagModel("BAAI/bge-m3", use_fp16=True, device=os.environ.get("RAG_DEVICE", "cuda"))
     out = []
     for q in queries:
         t0 = time.time()
@@ -354,7 +355,7 @@ def load_texts(need):
 def rerank_all(items, ctext):
     """一次加载 reranker，同时完成：child 重排（主路）+ 表指纹重排（旁路）"""
     from FlagEmbedding import FlagReranker
-    rer = FlagReranker("BAAI/bge-reranker-v2-m3", use_fp16=True, device="cuda")
+    rer = FlagReranker("BAAI/bge-reranker-v2-m3", use_fp16=True, device=os.environ.get("RAG_DEVICE", "cuda"))
     for it in items:
         q = it["query"]
         t0 = time.time()
@@ -386,7 +387,7 @@ def rerank_all(items, ctext):
 
         # 旁路
         doc, qv = it["doc"], it["qv"]
-        if doc is None or doc not in set(T_TK):
+        if doc is None or doc not in T_TK_SET:
             it["facts"] = []
             continue
         idxs = np.where(T_TK == doc)[0]

@@ -7,7 +7,7 @@ _sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)
 from config import P, DATA_DIR, ENV_FILE, load_env
 import os, sys, json, re, time, gc
 os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
-os.environ.setdefault("HF_HUB_OFFLINE", "1")
+os.environ.setdefault("HF_HUB_OFFLINE", os.environ.get("RAG_OFFLINE", "1"))
 import numpy as np
 import FlagEmbedding
 
@@ -119,8 +119,8 @@ if not todo:
 T_TK, T_PK, tvec, tbm25, TVOCAB = fr.T_TK, fr.T_PK, fr.tvec, fr.tbm25, fr.TVOCAB
 from FlagEmbedding import BGEM3FlagModel, FlagReranker  # noqa: E402
 
-enc = BGEM3FlagModel("BAAI/bge-m3", use_fp16=True, device="cuda")
-rer = FlagReranker("BAAI/bge-reranker-v2-m3", use_fp16=True, device="cuda")
+enc = BGEM3FlagModel("BAAI/bge-m3", use_fp16=True, device=os.environ.get("RAG_DEVICE", "cuda"))
+rer = FlagReranker("BAAI/bge-reranker-v2-m3", use_fp16=True, device=os.environ.get("RAG_DEVICE", "cuda"))
 
 B = 60
 f = open(OUT, "a", encoding="utf-8")

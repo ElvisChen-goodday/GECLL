@@ -4,7 +4,7 @@ _sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.dirname(_os.path.
 from config import P, DATA_DIR, ENV_FILE, load_env
 import os, json, sqlite3, time
 os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
-os.environ.setdefault("HF_HUB_OFFLINE", "1")
+os.environ.setdefault("HF_HUB_OFFLINE", os.environ.get("RAG_OFFLINE", "1"))
 
 import numpy as np
 import scipy.sparse as sp
@@ -48,7 +48,7 @@ with open(P("tables_db.jsonl"), "w", encoding="utf-8") as f:
         f.write(json.dumps(r, ensure_ascii=False) + "\n")
 
 t0 = time.time()
-model = BGEM3FlagModel("BAAI/bge-m3", use_fp16=True, device="cuda")
+model = BGEM3FlagModel("BAAI/bge-m3", use_fp16=True, device=os.environ.get("RAG_DEVICE", "cuda"))
 n = len(recs)
 vec = np.lib.format.open_memmap("tables_db_vec.npy", mode="w+", dtype=np.float16, shape=(n, 1024))
 step = 2000

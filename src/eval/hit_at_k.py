@@ -4,7 +4,7 @@ _sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.dirname(_os.path.
 from config import P, DATA_DIR, ENV_FILE, load_env
 import os, re, json, gc, csv, time, unicodedata, argparse
 os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
-os.environ.setdefault("HF_HUB_OFFLINE", "1")
+os.environ.setdefault("HF_HUB_OFFLINE", os.environ.get("RAG_OFFLINE", "1"))
 import numpy as np
 import scipy.sparse as sp
 from FlagEmbedding import BGEM3FlagModel, FlagReranker
@@ -71,7 +71,7 @@ random.seed(11)
 qs = uniq if a.n == 0 else random.sample(uniq, min(a.n, len(uniq)))
 print(f"评测题 {len(qs):,}（唯一金标池 {len(uniq):,}）", flush=True)
 
-emb = BGEM3FlagModel("BAAI/bge-m3", use_fp16=True, device="cuda")
+emb = BGEM3FlagModel("BAAI/bge-m3", use_fp16=True, device=os.environ.get("RAG_DEVICE", "cuda"))
 cands, golds = [], []
 t0 = time.time()
 for i, x in enumerate(qs, 1):
@@ -134,7 +134,7 @@ for cl, gs in zip(cands, golds):
     rk = min((ps.index(g) + 1 for g in gs if g in ps), default=999)
     pool_rank.append(rk)
 
-rer = FlagReranker("BAAI/bge-reranker-v2-m3", use_fp16=True, device="cuda")
+rer = FlagReranker("BAAI/bge-reranker-v2-m3", use_fp16=True, device=os.environ.get("RAG_DEVICE", "cuda"))
 t0 = time.time()
 rr_rank = []
 for x, cl in zip(qs, cands):

@@ -9,7 +9,7 @@ _sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.dirname(_os.path.
 from config import P, DATA_DIR, ENV_FILE, load_env
 import os, json, time, argparse
 os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
-os.environ.setdefault("HF_HUB_OFFLINE", "1")
+os.environ.setdefault("HF_HUB_OFFLINE", os.environ.get("RAG_OFFLINE", "1"))
 
 import numpy as np
 import torch
@@ -43,7 +43,7 @@ def main():
     print(f"待编码 child: {n:,}", flush=True)
 
     t0 = time.time()
-    model = BGEM3FlagModel("BAAI/bge-m3", use_fp16=True, device="cuda")
+    model = BGEM3FlagModel("BAAI/bge-m3", use_fp16=True, device=os.environ.get("RAG_DEVICE", "cuda"))
     print(f"模型就绪 {time.time()-t0:.1f}s", flush=True)
 
     vecs = np.lib.format.open_memmap(a.out, mode="w+", dtype=np.float16, shape=(n, 1024))

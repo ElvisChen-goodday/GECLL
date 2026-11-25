@@ -18,9 +18,7 @@ import importlib.util
 from lxml import etree
 
 
-spec = importlib.util.spec_from_file_location("pc", "parallel_chunks_v2.py")
-pc = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(pc)
+from src.parse import parallel_chunks_v2 as pc
 
 NUMRE = re.compile(r"^\(?-?\$?\s?[\d,]+(?:\.\d+)?\)?%?$")
 YEARRE = re.compile(r"(?<!\d)((?:FY|fiscal year )?(?:19|20)\d{2})(?!\d)", re.I)

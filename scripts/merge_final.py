@@ -30,7 +30,7 @@ if not better:
     raise SystemExit("缺少 verdicts_707_dense.jsonl，先跑 render_tables_707.py + eval_table_ab.py")
 
 # 补回 tbl 标记（分层报告需要），来源是上下文文件
-tbl_of = {}
+tbl_of, cat_of = {}, {}
 if os.path.exists(P("ctx_all.jsonl")):
     for line in open(P("ctx_all.jsonl"), encoding="utf-8"):
         try:
@@ -38,11 +38,13 @@ if os.path.exists(P("ctx_all.jsonl")):
         except Exception:
             continue
         tbl_of[c["qid"]] = bool(c.get("tbl"))
+        cat_of[c["qid"]] = c.get("category")
 
 merged = dict(base)
 merged.update(better)
 for qid, r in merged.items():
     r["tbl"] = tbl_of.get(qid, r.get("tbl", False))
+    r["category"] = cat_of.get(qid, r.get("category"))
 out = P("verdicts_final.jsonl")
 with open(out, "w", encoding="utf-8") as f:
     for qid, r in merged.items():

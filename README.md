@@ -77,17 +77,29 @@ RAG_FINTECH/
 
 ## 快速开始
 
-```bash
-# 1. 依赖
-pip install -r requirements.txt
+> **前置：代码仓库只有脚本，data/ 与模型权重都不在库里。** 首次运行需要：~4.3 GB 数据产物（见 `data/README.md`）+ ~2.5 GB 模型 + 一个 LLM API Key。
 
-# 2. 配置（复制后填 API Key；也可用环境变量覆盖）
+```bash
+# 1. 依赖（推荐锁定版；纯 CPU 机器改装 torch 的 CPU 轮子）
+pip install -r requirements.lock.txt
+
+# 2. 首次运行必须先拿到 BGE 模型（之后才能离线跑）
+#    方式 A：允许联网，首跑时把离线开关关掉
+export RAG_OFFLINE=0
+#    方式 B：预先下载，全程离线
+# huggingface-cli download BAAI/bge-m3
+# huggingface-cli download BAAI/bge-reranker-v2-m3
+
+# 3. 配置（复制后填 API Key）
 cp .env.example .env
 
-# 3. 指向数据目录（默认 D:/RAG/data/finder）
+# 4. 指向数据目录（默认 <repo>/data；你的数据在别处就改这里）
 export RAG_DATA_DIR=/path/to/finder_data
 
-# 4. 冒烟测试：单题跑通检索 + 作答
+# 5. 设备：没有 NVIDIA GPU 就设 cpu（检索会慢很多）
+export RAG_DEVICE=cuda     # 或 cpu
+
+# 6. 冒烟测试：单题跑通检索 + 作答
 python scripts/smoke_test.py "What was Lowe's cash dividend payments in 2023?"
 ```
 

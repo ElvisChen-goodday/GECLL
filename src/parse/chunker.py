@@ -20,9 +20,7 @@ import importlib.util
 from lxml import etree
 
 
-spec = importlib.util.spec_from_file_location("pc", "parallel_chunks_v2.py")
-pc = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(pc)
+from src.parse import parallel_chunks_v2 as pc
 
 BLOCK = {"h1", "h2", "h3", "h4", "h5", "h6", "p", "li", "div"}
 HEAD_RE = re.compile(r"^(item\s+\d+[a-c]?[.:]?|part\s+[ivx]+\.?|note\s+\d+[.:]?|article\s+[ivx\d]+)", re.I)
@@ -186,7 +184,7 @@ def chunk_doc(path):
             return
         text = "\n".join(buf)
         # 超大块按 6000 字符拆成多个 parent，避免 10 万字符的 parent
-        segs = [text] if len(text) <= PARENT_MAX else split_children(text)
+        segs = [text]
         if len(text) > PARENT_MAX:
             segs, cur = [], ""
             for piece in split_children(text):

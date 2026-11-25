@@ -1,0 +1,14 @@
+# 锁定版本（与作者实测环境一致，D:\RAG\.venv, Python 3.11.15, Windows）
+# 用法：pip install -r requirements.lock.txt
+# 注意：torch 是 CUDA 12.8 构建；纯 CPU 机器请改装 torch 的 CPU 版，并设 RAG_DEVICE=cpu
+numpy==2.4.6
+scipy==1.17.1
+requests==2.34.2
+torch==2.11.0+cu128
+FlagEmbedding==1.4.2
+transformers==5.17.0
+beautifulsoup4==4.15.0
+lxml==6.1.3
+pandas==3.0.5
+pyarrow==25.0.1
+tqdm==4.70.0

@@ -18,7 +18,7 @@ from src.generate.prompts import ANSWER_SYS as SYS, JUDGE_SYS as JUDGE, REPAIR_S
 import os, re, json, time, random, sys, threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
-os.environ.setdefault("HF_HUB_OFFLINE", "1")
+os.environ.setdefault("HF_HUB_OFFLINE", os.environ.get("RAG_OFFLINE", "1"))
 import requests
 
 
@@ -92,7 +92,12 @@ if PHASE in ("all", "ctx"):
                                "tbl": table_like(meta)})
             del items, ctext, ptext
         except Exception as e:
-            print(f"  批次 {s} 异常（跳过）: {str(e)[:160]}", flush=True)
+            print(f"  批次 {s} 异常，已记入 ctx_failed.jsonl: {str(e)[:160]}", flush=True)
+            with LOCK:
+                with open(P("ctx_failed.jsonl"), "a", encoding="utf-8") as f:
+                    for meta in batch:
+                        f.write(json.dumps({"qid": meta["_id"], "error": str(e)[:200]},
+                                           ensure_ascii=False) + "\n")
         gc.collect()
         if torch is not None:
             try:
